@@ -1,15 +1,15 @@
-import { Command } from 'commander';
-import {Prismify} from '../src/prismify';
-import path from 'path';
-import fs from 'fs';
+import { Command } from "commander";
+import { Prismify } from "../src/prismify";
+import path from "path";
+import fs from "fs";
 
 const program = new Command();
-program.option('-w, --watch', 'Watch for changes in schema files');
+program.option("-w, --watch", "Watch for changes in schema files");
 
 program.parse(process.argv);
 const options = program.opts();
 
-let configPath = path.join(process.cwd(), 'prismify.json');
+let configPath = path.join(process.cwd(), "prismify.json");
 if (options.config) {
   configPath = path.resolve(process.cwd(), options.config);
 }
@@ -19,7 +19,7 @@ if (!fs.existsSync(configPath)) {
   process.exit(1);
 }
 
-const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
 const schemaFolderPath = config.schemaFolderPath;
 const outputFilePath = config.outputFilePath;
 const watchMode = options.watch || config.watchMode || false;
