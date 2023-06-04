@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import kleur from "kleur";
 
 export interface PrismifyConfig {
   schemaFolderPath: string;
@@ -47,7 +48,7 @@ export class Prismify {
       "Base.prisma".toLowerCase(),
     );
     if (!fs.existsSync(baseSchemaPath)) {
-      console.error(`Required file 'Base.prisma' not found.`);
+      console.error(kleur.red("❌ Required file 'Base.prisma' not found."));
       process.exit(1);
     }
 
@@ -69,7 +70,10 @@ export class Prismify {
       const elapsedTime = this.formatElapsedTime(startTime, endTime);
 
       console.log(
-        `Unified schema file '${this.config.outputFilePath}' generated in ${elapsedTime}`
+        kleur.green().bold("✨ Unified schema file generated:") +
+          ` ${kleur.yellow(this.config.outputFilePath)} ${kleur.dim(
+            "(" + elapsedTime + ")"
+          )}`
       );
     } else {
       return;
@@ -80,7 +84,10 @@ export class Prismify {
     this.mergeSchemas();
 
     if (this.config.watchMode) {
-      console.log(`Watching for changes in '${this.config.schemaFolderPath}'.`);
+      console.log(
+        kleur.yellow().bold("👀 Watching for changes in:") +
+          ` ${kleur.cyan(this.config.schemaFolderPath)}`
+      );
 
       fs.watch(this.config.schemaFolderPath, { recursive: true }, () => {
         this.mergeSchemas();
