@@ -45,4 +45,3 @@ export class Prismify {
   }
 }
 
-export default Prismify;
