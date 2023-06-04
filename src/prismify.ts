@@ -14,8 +14,15 @@ export class Prismify {
     this.previousSchemaContent = '';
   }
 
+  private formatElapsedTime(startTime: number, endTime: number): string {
+    const elapsedTime = (endTime - startTime);
+    return `${elapsedTime} ms`;
+  }
+
   private mergeSchemas(): void {
     const files = fs.readdirSync(this.schemaFolderPath);
+
+    const startTime = new Date().getTime();
 
     const schemaContents = files
       .filter((file) => file.endsWith('.prisma'))
@@ -26,9 +33,12 @@ export class Prismify {
       fs.writeFileSync(this.outputFilePath, schemaContents, 'utf-8');
       this.previousSchemaContent = schemaContents;
 
-      console.log(`Unified schema file '${this.outputFilePath}' generated.`);
+      const endTime = new Date().getTime();
+      const elapsedTime = this.formatElapsedTime(startTime, endTime);
+
+      console.log(`Unified schema file '${this.outputFilePath}' generated in ${elapsedTime}`);
     } else {
-      return;
+        return;
     }
   }
 
@@ -44,4 +54,3 @@ export class Prismify {
     }
   }
 }
-
