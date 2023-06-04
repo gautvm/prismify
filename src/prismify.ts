@@ -5,11 +5,13 @@ export class Prismify {
   private schemaFolderPath: string;
   private outputFilePath: string;
   private watchMode: boolean;
+  private previousSchemaContent: string;
 
   public constructor(schemaFolderPath: string, outputFilePath: string, watchMode: boolean) {
     this.schemaFolderPath = schemaFolderPath;
     this.outputFilePath = outputFilePath;
     this.watchMode = watchMode;
+    this.previousSchemaContent = '';
   }
 
   private mergeSchemas(): void {
@@ -20,9 +22,14 @@ export class Prismify {
       .map((file) => fs.readFileSync(path.join(this.schemaFolderPath, file), 'utf-8'))
       .join('\n');
 
-    fs.writeFileSync(this.outputFilePath, schemaContents, 'utf-8');
+    if (schemaContents !== this.previousSchemaContent) {
+      fs.writeFileSync(this.outputFilePath, schemaContents, 'utf-8');
+      this.previousSchemaContent = schemaContents;
 
-    console.log(`Unified schema file '${this.outputFilePath}' generated.`);
+      console.log(`Unified schema file '${this.outputFilePath}' generated.`);
+    } else {
+      return;
+    }
   }
 
   public run(): void {
@@ -37,3 +44,5 @@ export class Prismify {
     }
   }
 }
+
+export default Prismify;
