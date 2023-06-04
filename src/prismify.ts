@@ -23,7 +23,7 @@ export class Prismify {
     return `${elapsedTime} ms`;
   }
 
-private searchForSchemaFiles = (dir: string, schemaFiles: string[]): void => {
+  private searchForSchemaFiles = (dir: string, schemaFiles: string[]): void => {
     const files = fs.readdirSync(dir);
 
     files.forEach((file) => {
@@ -32,7 +32,7 @@ private searchForSchemaFiles = (dir: string, schemaFiles: string[]): void => {
 
       if (isDirectory) {
         this.searchForSchemaFiles(filePath, schemaFiles);
-      } else if (file.endsWith('.prisma')) {
+      } else if (file.endsWith(".prisma")) {
         schemaFiles.push(filePath);
       }
     });
@@ -41,27 +41,28 @@ private searchForSchemaFiles = (dir: string, schemaFiles: string[]): void => {
   private mergeSchemas(): void {
     const schemaFiles: string[] = [];
     const startTime = new Date().getTime();
-  
+
     this.searchForSchemaFiles(this.schemaFolderPath, schemaFiles);
-  
+
     const schemaContents = schemaFiles
-      .map((filePath) => fs.readFileSync(filePath, 'utf-8'))
-      .join('\n');
-  
+      .map((filePath) => fs.readFileSync(filePath, "utf-8"))
+      .join("\n");
+
     if (schemaContents !== this.previousSchemaContent) {
-      fs.writeFileSync(this.outputFilePath, schemaContents, 'utf-8');
+      fs.writeFileSync(this.outputFilePath, schemaContents, "utf-8");
       this.previousSchemaContent = schemaContents;
 
       const endTime = new Date().getTime();
       const elapsedTime = this.formatElapsedTime(startTime, endTime);
-  
-      console.log(`Unified schema file '${this.outputFilePath}' generated. in ${elapsedTime}`);
+
+      console.log(
+        `Unified schema file '${this.outputFilePath}' generated. in ${elapsedTime}`
+      );
     } else {
-        return;
+      return;
     }
   }
 
-  
   public run(): void {
     this.mergeSchemas();
 
