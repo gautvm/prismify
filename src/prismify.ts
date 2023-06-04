@@ -39,32 +39,35 @@ export class Prismify {
   private mergeSchemas(): void {
     const schemaFiles: string[] = [];
     const startTime = new Date().getTime();
-  
+
     this.searchForSchemaFiles(this.config.schemaFolderPath, schemaFiles);
-  
-    const baseSchemaPath = path.join(this.config.schemaFolderPath, 'Base.prisma');
+
+    const baseSchemaPath = path.join(
+      this.config.schemaFolderPath,
+      "Base.prisma".toLowerCase(),
+    );
     if (!fs.existsSync(baseSchemaPath)) {
       console.error(`Required file 'Base.prisma' not found.`);
       process.exit(1);
     }
-  
-    const baseSchema = fs.readFileSync(baseSchemaPath, 'utf-8');
+
+    const baseSchema = fs.readFileSync(baseSchemaPath, "utf-8");
     const schemaContents = schemaFiles
       .map((filePath) => {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        return filePath === baseSchemaPath ? '' : content;
+        const content = fs.readFileSync(filePath, "utf-8");
+        return filePath === baseSchemaPath ? "" : content;
       })
-      .join('\n');
-  
+      .join("\n");
+
     const generatedSchema = `${baseSchema}\n\n${schemaContents}`;
-  
+
     if (generatedSchema !== this.previousSchemaContent) {
-      fs.writeFileSync(this.config.outputFilePath, generatedSchema, 'utf-8');
+      fs.writeFileSync(this.config.outputFilePath, generatedSchema, "utf-8");
       this.previousSchemaContent = generatedSchema;
-  
+
       const endTime = new Date().getTime();
       const elapsedTime = this.formatElapsedTime(startTime, endTime);
-  
+
       console.log(
         `Unified schema file '${this.config.outputFilePath}' generated in ${elapsedTime}`
       );
@@ -72,7 +75,6 @@ export class Prismify {
       return;
     }
   }
-  
 
   public run(): void {
     this.mergeSchemas();
