@@ -56,7 +56,7 @@ export class Prismify {
       const elapsedTime = this.formatElapsedTime(startTime, endTime);
 
       console.log(
-        `Unified schema file '${this.outputFilePath}' generated. in ${elapsedTime}`
+        `Unified schema file '${this.outputFilePath}' generated in ${elapsedTime}`
       );
     } else {
       return;

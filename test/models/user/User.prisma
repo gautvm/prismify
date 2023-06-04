@@ -3,4 +3,3 @@ model User {
   name      String
   email2     String   @unique
 }
-
