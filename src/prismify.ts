@@ -7,7 +7,7 @@ export interface PrismifyConfig {
   schemaFolderPath: string;
   outputFilePath: string;
   watchMode: boolean;
-  logDiffs: boolean; 
+  logDiffs: boolean;
 }
 
 export class Prismify {

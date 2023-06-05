@@ -36,7 +36,7 @@ program
       schemaFolderPath: options.schema || settings.schemaFolderPath,
       outputFilePath: options.output || settings.outputFilePath,
       watchMode: options.watch || settings.watchMode || false,
-      logDiffs: options.diffs || settings.logDiffs || false, 
+      logDiffs: options.diffs || settings.logDiffs || false,
     };
 
     const prismify = new Prismify(config);
@@ -58,7 +58,7 @@ program
       schemaFolderPath: "schemas",
       outputFilePath: "schema.prisma",
       watchMode: false,
-      logDiffs: false, 
+      logDiffs: false,
     };
 
     fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
