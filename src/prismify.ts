@@ -83,8 +83,6 @@ export class Prismify {
   }
 
   public run(): void {
-    console.log(kleur.bold().cyan("🚀 Prismify Schema Generation"));
-
     this.mergeSchemas();
 
     if (this.config.watchMode) {

@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { Prismify, PrismifyConfig } from "../src/prismify";
 import path from "path";
 import fs from "fs";
+import kleur from "kleur";
 
 const program = new Command();
 
@@ -23,7 +24,7 @@ program
       : path.join(process.cwd(), "prismify.json");
 
     if (!fs.existsSync(configPath)) {
-      console.error(`Configuration file not found: ${configPath}`);
+      console.error(kleur.red(`Configuration file not found: ${configPath}`));
       process.exit(1);
     }
 
@@ -47,7 +48,7 @@ program
     const configPath = path.join(process.cwd(), "prismify.json");
 
     if (fs.existsSync(configPath)) {
-      console.error("Prismify configuration file already exists.");
+      console.error(kleur.red("Prismify configuration file already exists."));
       return;
     }
 
@@ -58,7 +59,7 @@ program
     };
 
     fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
-    console.log(`Prismify configuration file created: ${configPath}`);
+    console.log(kleur.green(`Prismify configuration file created: ${configPath}`));
   });
 
 program.parse(process.argv);
