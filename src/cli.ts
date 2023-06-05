@@ -1,5 +1,7 @@
+#!/usr/bin/env node
+
 import { Command } from "commander";
-import { Prismify, PrismifyConfig } from "../src/prismify";
+import { Prismify, PrismifyConfig } from "./prismify";
 import path from "path";
 import fs from "fs";
 import kleur from "kleur";
