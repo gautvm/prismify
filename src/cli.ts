@@ -18,6 +18,7 @@ program
   .option("-c, --config <path>", "Path to the configuration file")
   .option("-s, --schema <path>", "Path to the schema folder")
   .option("-o, --output <path>", "Path to the output file")
+  .option("-d, --diffs", "Log the schema diffs")
   .action((options) => {
     const configPath = options.config
       ? path.resolve(process.cwd(), options.config)
@@ -35,6 +36,7 @@ program
       schemaFolderPath: options.schema || settings.schemaFolderPath,
       outputFilePath: options.output || settings.outputFilePath,
       watchMode: options.watch || settings.watchMode || false,
+      logDiffs: options.diffs || settings.logDiffs || false, 
     };
 
     const prismify = new Prismify(config);
@@ -56,10 +58,13 @@ program
       schemaFolderPath: "schemas",
       outputFilePath: "schema.prisma",
       watchMode: false,
+      logDiffs: false, 
     };
 
     fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
-    console.log(kleur.green(`Prismify configuration file created: ${configPath}`));
+    console.log(
+      kleur.green(`Prismify configuration file created: ${configPath}`)
+    );
   });
 
 program.parse(process.argv);
