@@ -1,4 +1,5 @@
 {
   "schemaFolderPath": "./test/models",
-  "outputFilePath": "./test/prisma/schema.prisma"
+  "outputFilePath": "./test/prisma/schema.prisma",
+  "watchMode": true
 }
