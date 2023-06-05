@@ -58,8 +58,11 @@ export class Prismify {
     const baseSchema = fs.readFileSync(baseSchemaPath, "utf-8");
     const schemaContents = schemaFiles
       .map((filePath) => {
+        const aliasRegex = /\/\/Alias([\s\S]*?)\}/g;
         const content = fs.readFileSync(filePath, "utf-8");
-        return filePath === baseSchemaPath ? "" : content;
+        const contentWithoutAlias = content.replace(aliasRegex, "");
+        console.log(content.replace(aliasRegex, ""));
+        return filePath === baseSchemaPath ? "" : contentWithoutAlias;
       })
       .join("\n");
 
@@ -118,10 +121,10 @@ export class Prismify {
         if (!content.includes(`model ${match[1]}`)) {
           console.log(match);
           const alias = `
-           model ${match[1]} {
-             id     Int   @id @default(autoincrement())
-             alias String
-           }`;
+//Alias
+model ${match[1]} {
+id     Int   @id @default(autoincrement())
+}`;
 
           fs.appendFileSync(file, alias);
           exec("npx prisma format --schema=" + file, {});
