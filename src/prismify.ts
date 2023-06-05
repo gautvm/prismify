@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import kleur from "kleur";
 import { diffLines } from "diff";
+import { exec } from "child_process";
 
 export interface PrismifyConfig {
   schemaFolderPath: string;
@@ -98,6 +99,35 @@ export class Prismify {
         this.logSchemaDiffs(diff);
       }
     }
+
+    this.checkForRelations();
+
+    exec("npx prisma format --schema=" + this.config.outputFilePath, {});
+  };
+
+  private checkForRelations = () => {
+    const schemaFiles = this.searchForSchemaFiles(this.config.schemaFolderPath);
+
+    schemaFiles.forEach((file) => {
+      const content = fs.readFileSync(file, "utf-8");
+
+      const regex = /\b(\w+)\[\]/i;
+      const match = content.match(regex);
+
+      if (match) {
+        if (!content.includes(`model ${match[1]}`)) {
+          console.log(match);
+          const alias = `
+           model ${match[1]} {
+             id     Int   @id @default(autoincrement())
+             alias String
+           }`;
+
+          fs.appendFileSync(file, alias);
+          exec("npx prisma format --schema=" + file, {});
+        }
+      }
+    });
   };
 
   private logSchemaDiffs(diff: any): void {
