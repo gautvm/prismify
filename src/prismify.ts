@@ -61,7 +61,6 @@ export class Prismify {
         const aliasRegex = /\/\/Alias([\s\S]*?)\}/g;
         const content = fs.readFileSync(filePath, "utf-8");
         const contentWithoutAlias = content.replace(aliasRegex, "");
-        console.log(content.replace(aliasRegex, ""));
         return filePath === baseSchemaPath ? "" : contentWithoutAlias;
       })
       .join("\n");
@@ -83,7 +82,8 @@ export class Prismify {
     );
   }
 
-  private generateAndSaveSchema(): void {
+  private generateAndSaveSchema = () => {
+    this.checkForRelations();
     const startTime = new Date().getTime();
     const generatedSchema = this.generateUnifiedSchema();
 
@@ -103,8 +103,6 @@ export class Prismify {
       }
     }
 
-    this.checkForRelations();
-
     exec("npx prisma format --schema=" + this.config.outputFilePath, {});
   };
 
@@ -114,24 +112,24 @@ export class Prismify {
     schemaFiles.forEach((file) => {
       const content = fs.readFileSync(file, "utf-8");
 
-      const regex = /\b(\w+)\[\]/i;
-      const match = content.match(regex);
+      const regex = /\b(\w+)\[\]/gi;
+      const matches = [...content.matchAll(regex)];
+      matches.forEach((match) => {
+        if (match) {
+          if (!content.includes(`model ${match[1]}`)) {
+            const alias = `
+  //Alias
+  model ${match[1]} {
+  id     Int   @id @default(autoincrement())
+  }`;
 
-      if (match) {
-        if (!content.includes(`model ${match[1]}`)) {
-          console.log(match);
-          const alias = `
-// Alias
-model ${match[1]} {
-id     Int   @id @default(autoincrement())
-}`;
-
-          fs.appendFileSync(file, alias);
-          exec("npx prisma format --schema=" + file, {});
+            fs.appendFileSync(file, alias);
+            exec("npx prisma format --schema=" + file, {});
+          }
         }
-      }
+      });
     });
-  };
+  }
 
   private logSchemaDiffs(diff: any): void {
     const addedLines: string[] = [];
