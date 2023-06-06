@@ -83,7 +83,7 @@ export class Prismify {
     );
   }
 
-  private generateAndSaveSchema = () => {
+  private generateAndSaveSchema(): void {
     const startTime = new Date().getTime();
     const generatedSchema = this.generateUnifiedSchema();
 
@@ -108,7 +108,7 @@ export class Prismify {
     exec("npx prisma format --schema=" + this.config.outputFilePath, {});
   };
 
-  private checkForRelations = () => {
+  private checkForRelations(): void {
     const schemaFiles = this.searchForSchemaFiles(this.config.schemaFolderPath);
 
     schemaFiles.forEach((file) => {
@@ -121,7 +121,7 @@ export class Prismify {
         if (!content.includes(`model ${match[1]}`)) {
           console.log(match);
           const alias = `
-//Alias
+// Alias
 model ${match[1]} {
 id     Int   @id @default(autoincrement())
 }`;
