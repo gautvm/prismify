@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import { Prismify, PrismifyConfig } from "./prismify";
+import { Prismify } from "./Prismify";
+import { Config } from "./types/Config";
 import path from "path";
 import fs from "fs";
 import kleur from "kleur";
@@ -34,7 +35,7 @@ program
     const configContent = fs.readFileSync(configPath, "utf-8");
     const settings = JSON.parse(configContent);
 
-    const config: PrismifyConfig = {
+    const config: Config = {
       schemaFolderPath: options.schema || settings.schemaFolderPath,
       outputFilePath: options.output || settings.outputFilePath,
       watchMode: options.watch || settings.watchMode || false,
@@ -56,7 +57,7 @@ program
       return;
     }
 
-    const defaultConfig: PrismifyConfig = {
+    const defaultConfig: Config = {
       schemaFolderPath: "schemas",
       outputFilePath: "schema.prisma",
       watchMode: false,
