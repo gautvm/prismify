@@ -4,6 +4,10 @@ import kleur from "kleur";
 import { diffLines } from "diff";
 import { exec } from "child_process";
 
+interface AliasMatch {
+  modelName: string;
+}
+
 export interface PrismifyConfig {
   schemaFolderPath: string;
   outputFilePath: string;
@@ -27,15 +31,14 @@ export class Prismify {
 
   private searchForSchemaFiles(dir: string): string[] {
     const schemaFiles: string[] = [];
-    const files = fs.readdirSync(dir);
+    const files = fs.readdirSync(dir, { withFileTypes: true });
 
     files.forEach((file) => {
-      const filePath = path.join(dir, file);
-      const isDirectory = fs.lstatSync(filePath).isDirectory();
+      const filePath = path.join(dir, file.name);
 
-      if (isDirectory) {
+      if (file.isDirectory()) {
         schemaFiles.push(...this.searchForSchemaFiles(filePath));
-      } else if (file.endsWith(".prisma")) {
+      } else if (file.isFile() && file.name.endsWith(".prisma")) {
         schemaFiles.push(filePath);
       }
     });
@@ -72,60 +75,48 @@ export class Prismify {
     return generatedSchema;
   }
 
-  private logSchemaGeneration(
-    outputFilePath: string,
-    elapsedTime: string
-  ): void {
+  private logSchemaGeneration(outputFilePath: string, elapsedTime: string): void {
     console.log(
       kleur.green().bold("✨ Unified schema file generated:") +
         ` ${kleur.yellow(outputFilePath)} ${kleur.dim("(" + elapsedTime + ")")}`
     );
   }
 
-  private generateAndSaveSchema = () => {
-    this.checkForRelations();
-    const startTime = new Date().getTime();
-    const generatedSchema = this.generateUnifiedSchema();
+  private appendAliasModelToSchema(file: string, modelName: string): void {
+    const alias = `
+  //Alias
+  model ${modelName} {
+    id     Int   @id @default(autoincrement())
+  }`;
 
-    if (generatedSchema !== this.previousSchemaContent) {
-      const diff = diffLines(this.previousSchemaContent, generatedSchema);
+    fs.appendFileSync(file, alias);
+    exec("npx prisma format --schema=" + file, {});
+  }
 
-      fs.writeFileSync(this.config.outputFilePath, generatedSchema, "utf-8");
-      this.previousSchemaContent = generatedSchema;
+  private checkForRelationsInSchema(file: string): AliasMatch[] {
+    const content = fs.readFileSync(file, "utf-8");
 
-      const endTime = new Date().getTime();
-      const elapsedTime = this.formatElapsedTime(startTime, endTime);
+    const regex = /\b(\w+)\[\]/gi;
+    const matches: AliasMatch[] = [];
+    let match: RegExpExecArray | null;
 
-      this.logSchemaGeneration(this.config.outputFilePath, elapsedTime);
-
-      if (this.config.logDiffs) {
-        this.logSchemaDiffs(diff);
-      }
+    while ((match = regex.exec(content))) {
+      const modelName = match[1];
+      matches.push({ modelName });
     }
 
-    exec("npx prisma format --schema=" + this.config.outputFilePath, {});
-  };
+    return matches;
+  }
 
   private checkForRelations(): void {
     const schemaFiles = this.searchForSchemaFiles(this.config.schemaFolderPath);
 
     schemaFiles.forEach((file) => {
-      const content = fs.readFileSync(file, "utf-8");
+      const matches = this.checkForRelationsInSchema(file);
 
-      const regex = /\b(\w+)\[\]/gi;
-      const matches = [...content.matchAll(regex)];
       matches.forEach((match) => {
-        if (match) {
-          if (!content.includes(`model ${match[1]}`)) {
-            const alias = `
-  //Alias
-  model ${match[1]} {
-  id     Int   @id @default(autoincrement())
-  }`;
-
-            fs.appendFileSync(file, alias);
-            exec("npx prisma format --schema=" + file, {});
-          }
+        if (!fs.readFileSync(file, "utf-8").includes(`model ${match.modelName}`)) {
+          this.appendAliasModelToSchema(file, match.modelName);
         }
       });
     });
@@ -154,6 +145,30 @@ export class Prismify {
       console.log(kleur.red(removedLines.join("")));
     }
   }
+
+  private generateAndSaveSchema = (): void => {
+    this.checkForRelations();
+    const startTime = Date.now();
+    const generatedSchema = this.generateUnifiedSchema();
+
+    if (generatedSchema !== this.previousSchemaContent) {
+      const diff = diffLines(this.previousSchemaContent, generatedSchema);
+
+      fs.writeFileSync(this.config.outputFilePath, generatedSchema, "utf-8");
+      this.previousSchemaContent = generatedSchema;
+
+      const endTime = Date.now();
+      const elapsedTime = this.formatElapsedTime(startTime, endTime);
+
+      this.logSchemaGeneration(this.config.outputFilePath, elapsedTime);
+
+      if (this.config.logDiffs) {
+        this.logSchemaDiffs(diff);
+      }
+    }
+
+    exec("npx prisma format --schema=" + this.config.outputFilePath, {});
+  };
 
   public run(): void {
     this.generateAndSaveSchema();
