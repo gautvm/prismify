@@ -8,6 +8,11 @@ interface AliasMatch {
   modelName: string;
 }
 
+interface SchemaFile {
+  filePath: string;
+  isDirectory: boolean;
+}
+
 export interface PrismifyConfig {
   schemaFolderPath: string;
   outputFilePath: string;
@@ -29,17 +34,18 @@ export class Prismify {
     return `${elapsedTime} ms`;
   }
 
-  private searchForSchemaFiles(dir: string): string[] {
-    const schemaFiles: string[] = [];
+  private searchForSchemaFiles(dir: string): SchemaFile[] {
+    const schemaFiles: SchemaFile[] = [];
     const files = fs.readdirSync(dir, { withFileTypes: true });
 
     files.forEach((file) => {
       const filePath = path.join(dir, file.name);
+      const isDirectory = file.isDirectory();
 
-      if (file.isDirectory()) {
+      if (isDirectory) {
         schemaFiles.push(...this.searchForSchemaFiles(filePath));
       } else if (file.isFile() && file.name.endsWith(".prisma")) {
-        schemaFiles.push(filePath);
+        schemaFiles.push({ filePath, isDirectory });
       }
     });
 
@@ -60,11 +66,15 @@ export class Prismify {
 
     const baseSchema = fs.readFileSync(baseSchemaPath, "utf-8");
     const schemaContents = schemaFiles
-      .map((filePath) => {
+      .map((file) => {
+        if (file.filePath === baseSchemaPath) {
+          return "";
+        }
+
         const aliasRegex = /\/\/Alias([\s\S]*?)\}/g;
-        const content = fs.readFileSync(filePath, "utf-8");
+        const content = fs.readFileSync(file.filePath, "utf-8");
         const contentWithoutAlias = content.replace(aliasRegex, "");
-        return filePath === baseSchemaPath ? "" : contentWithoutAlias;
+        return contentWithoutAlias;
       })
       .join("\n");
 
@@ -100,7 +110,7 @@ export class Prismify {
     const matches: AliasMatch[] = [];
     let match: RegExpExecArray | null;
 
-    while ((match = regex.exec(content))) {
+    while ((match = regex.exec(content)) !== null) {
       const modelName = match[1];
       matches.push({ modelName });
     }
@@ -112,11 +122,11 @@ export class Prismify {
     const schemaFiles = this.searchForSchemaFiles(this.config.schemaFolderPath);
 
     schemaFiles.forEach((file) => {
-      const matches = this.checkForRelationsInSchema(file);
+      const matches = this.checkForRelationsInSchema(file.filePath);
 
       matches.forEach((match) => {
-        if (!fs.readFileSync(file, "utf-8").includes(`model ${match.modelName}`)) {
-          this.appendAliasModelToSchema(file, match.modelName);
+        if (!fs.readFileSync(file.filePath, "utf-8").includes(`model ${match.modelName}`)) {
+          this.appendAliasModelToSchema(file.filePath, match.modelName);
         }
       });
     });
