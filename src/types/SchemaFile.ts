@@ -1,4 +1,4 @@
 export interface SchemaFile {
-    filePath: string;
-    isBaseSchema?: boolean;
-  }
+  filePath: string;
+  isBaseSchema?: boolean;
+}

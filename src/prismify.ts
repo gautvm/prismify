@@ -20,7 +20,10 @@ export class Prismify {
     return `${elapsedTime} ms`;
   }
 
-  private logSchemaGeneration(outputFilePath: string, elapsedTime: string): void {
+  private logSchemaGeneration(
+    outputFilePath: string,
+    elapsedTime: string
+  ): void {
     console.log(
       kleur.green().bold("✨ Unified schema file generated:") +
         ` ${kleur.yellow(outputFilePath)} ${kleur.dim("(" + elapsedTime + ")")}`
@@ -55,7 +58,7 @@ export class Prismify {
     AliasGenerator.generateAliases(this.config.schemaFolderPath);
     const startTime = new Date().getTime();
     const generatedSchema = SchemaGenerator.generateUnifiedSchema(
-      this.config.schemaFolderPath,
+      this.config.schemaFolderPath
     );
 
     if (generatedSchema !== this.previousSchemaContent) {

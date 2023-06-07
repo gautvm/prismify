@@ -20,7 +20,10 @@ export class SchemaGenerator {
     const schemaContents = schemaFiles
       .map((file) => {
         const content = fs.readFileSync(file.filePath, "utf-8");
-        const contentWithoutAlias = content.replace(/\/\/Alias([\s\S]*?)\}/g, "");
+        const contentWithoutAlias = content.replace(
+          /\/\/Alias([\s\S]*?)\}/g,
+          ""
+        );
         return file.isBaseSchema ? "" : contentWithoutAlias;
       })
       .join("\n");
