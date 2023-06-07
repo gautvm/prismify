@@ -1,11 +1,10 @@
 import fs from "fs";
 import { exec } from "child_process";
-import { SchemaFile } from "../types/SchemaFile";
-import path from "path";
+import { SchemaFileUtil } from "../util/SchemaFileUtil";
 
 export class AliasGenerator {
   public static generateAliases(schemaFolderPath: string): void {
-    const schemaFiles = AliasGenerator.searchForSchemaFiles(schemaFolderPath);
+    const schemaFiles = SchemaFileUtil.searchForSchemaFiles(schemaFolderPath);
 
     schemaFiles.forEach((file) => {
       const content = fs.readFileSync(file.filePath, "utf-8");
@@ -23,23 +22,5 @@ export class AliasGenerator {
         }
       }
     });
-  }
-
-  private static searchForSchemaFiles(dir: string): SchemaFile[] {
-    const schemaFiles: SchemaFile[] = [];
-    const files = fs.readdirSync(dir);
-
-    files.forEach((file) => {
-      const filePath = path.join(dir, file);
-      const isDirectory = fs.lstatSync(filePath).isDirectory();
-
-      if (isDirectory) {
-        schemaFiles.push(...AliasGenerator.searchForSchemaFiles(filePath));
-      } else if (file.endsWith(".prisma")) {
-        schemaFiles.push({ filePath });
-      }
-    });
-
-    return schemaFiles;
   }
 }

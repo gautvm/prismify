@@ -1,11 +1,11 @@
 import fs from "fs";
 import kleur from "kleur";
 import path from "path";
-import { SchemaFile } from "../types/SchemaFile";
+import { SchemaFileUtil } from "../util/SchemaFileUtil";
 
 export class SchemaGenerator {
   public static generateUnifiedSchema(schemaFolderPath: string): string {
-    const schemaFiles = SchemaGenerator.searchForSchemaFiles(schemaFolderPath);
+    const schemaFiles = SchemaFileUtil.searchForSchemaFiles(schemaFolderPath);
 
     const baseSchemaPath = path.join(
       schemaFolderPath,
@@ -33,24 +33,5 @@ export class SchemaGenerator {
     const generatedSchema = `${warningComment}\n\n${baseSchema}\n\n${schemaContents}`;
 
     return generatedSchema;
-  }
-
-  private static searchForSchemaFiles(dir: string): SchemaFile[] {
-    const schemaFiles: SchemaFile[] = [];
-    const files = fs.readdirSync(dir);
-
-    files.forEach((file) => {
-      const filePath = path.join(dir, file);
-      const isDirectory = fs.lstatSync(filePath).isDirectory();
-      const isBaseSchema = file.toLowerCase() === "base.prisma";
-
-      if (isDirectory) {
-        schemaFiles.push(...SchemaGenerator.searchForSchemaFiles(filePath));
-      } else if (file.endsWith(".prisma")) {
-        schemaFiles.push({ filePath, isBaseSchema });
-      }
-    });
-
-    return schemaFiles;
   }
 }

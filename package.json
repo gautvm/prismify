@@ -2,11 +2,11 @@
   "name": "prismify",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/cli.js",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "ts-node src/cli.ts",
+    "dev": "ts-node src/index.ts",
     "build": "tsc",
-    "start": "ts-node src/cli.ts",
+    "start": "ts-node src/index.js",
     "lint": "prettier --write ."
   },
   "bin": {
